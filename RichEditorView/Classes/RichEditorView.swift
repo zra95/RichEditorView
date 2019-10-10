@@ -21,6 +21,9 @@ private let DefaultInnerLineHeight: Int = 21
     @objc optional func richEditor(_ editor: RichEditorView, contentDidChange content: String)
     
     /// Called when the rich editor starts editing
+    @objc optional func richEditorTookFocusAt(_ editor: RichEditorView, at: CGPoint)
+  
+    /// Called when the rich editor starts editing
     @objc optional func richEditorTookFocus(_ editor: RichEditorView)
     
     /// Called when the rich editor stops editing or loses focus
@@ -346,6 +349,7 @@ private let DefaultInnerLineHeight: Int = 21
     }
     
     public func focus(at: CGPoint) {
+        delegate?.richEditorTookFocusAt?(self, at: at)
         runJS("RE.focusAtPoint(\(at.x), \(at.y))")
     }
     
