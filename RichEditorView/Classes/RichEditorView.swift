@@ -139,7 +139,9 @@ private let DefaultInnerLineHeight: Int = 21
         webView.frame = bounds
         webView.navigationDelegate = self
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webView.configuration.dataDetectorTypes = WKDataDetectorTypes()
+        if #available(iOS 10.0, *) {
+            webView.configuration.dataDetectorTypes = WKDataDetectorTypes()
+        }
         webView.scrollView.isScrollEnabled = isScrollEnabled
         webView.scrollView.bounces = true
         webView.scrollView.delegate = self
