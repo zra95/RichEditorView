@@ -27,21 +27,29 @@ import UIKit
 /// RichBarButtonItem is a subclass of UIBarButtonItem that takes a callback as opposed to the target-action pattern
 @objcMembers open class RichBarButtonItem: UIBarButtonItem {
     open var actionHandler: (() -> Void)?
-    
+
     public convenience init(image: UIImage? = nil, handler: (() -> Void)? = nil) {
         self.init(image: image, style: .plain, target: nil, action: nil)
         target = self
         action = #selector(RichBarButtonItem.buttonWasTapped)
         actionHandler = handler
     }
-    
+
     public convenience init(title: String = "", handler: (() -> Void)? = nil) {
-        self.init(title: title, style: .plain, target: nil, action: nil)
-        target = self
-        action = #selector(RichBarButtonItem.buttonWasTapped)
+
+        // temporary workaround
+        let btn = UIButton()
+        btn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        btn.setTitle(title, for: .normal)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        btn.setTitleColor(.link, for: .normal)
+        btn.setTitleColor(.lightGray, for: .highlighted)
+
+        self.init(customView: btn)
+        btn.addTarget(self, action: #selector(RichBarButtonItem.buttonWasTapped), for: .touchUpInside)
         actionHandler = handler
     }
-    
+
     @objc func buttonWasTapped() {
         actionHandler?()
     }
@@ -72,7 +80,7 @@ import UIKit
     private var toolbarScroll: UIScrollView
     private var toolbar: UIToolbar
     private var backgroundToolbar: UIToolbar
-    
+
     public override init(frame: CGRect) {
         toolbarScroll = UIScrollView()
         toolbar = UIToolbar()
@@ -80,7 +88,7 @@ import UIKit
         super.init(frame: frame)
         setup()
     }
-    
+
     public required init?(coder aDecoder: NSCoder) {
         toolbarScroll = UIScrollView()
         toolbar = UIToolbar()
@@ -88,7 +96,7 @@ import UIKit
         super.init(coder: aDecoder)
         setup()
     }
-    
+
     private func setup() {
         autoresizingMask = .flexibleWidth
         backgroundColor = .clear
@@ -113,7 +121,7 @@ import UIKit
         addSubview(toolbarScroll)
         updateToolbar()
     }
-    
+
     private func updateToolbar() {
         var buttons = [UIBarButtonItem]()
         for option in options {
@@ -132,25 +140,27 @@ import UIKit
                 buttons.append(button)
             }
         }
+
         toolbar.items = buttons
 
         let defaultIconWidth: CGFloat = 28
         let barButtonItemMargin: CGFloat = 12
-        let width: CGFloat = buttons.reduce(0) {sofar, new in
-            if let view = new.value(forKey: "view") as? UIView {
+        let customWidth: CGFloat = buttons.reduce(0) { sofar, new in
+            if let view = new.customView {
+                view.sizeToFit()
                 return sofar + view.frame.size.width + barButtonItemMargin
             } else {
                 return sofar + (defaultIconWidth + barButtonItemMargin)
             }
         }
-        
-        if width < frame.size.width {
+
+        if customWidth < frame.size.width {
             toolbar.frame.size.width = frame.size.width + barButtonItemMargin
         } else {
-            toolbar.frame.size.width = width + barButtonItemMargin
+            toolbar.frame.size.width = customWidth + barButtonItemMargin
         }
         toolbar.frame.size.height = 44
-        toolbarScroll.contentSize.width = width
+        toolbarScroll.contentSize.width = customWidth
     }
-    
+
 }
